@@ -16,11 +16,11 @@
 from typing import Dict, Optional
 from hashlib import sha256
 import mimetypes
-import argparse
 import os.path
 import asyncio
 import string
 import json
+import typer  # Importa la librería Typer
 
 try:
     import magic
@@ -30,6 +30,7 @@ except ImportError:
 
 from .lib import matrix, util
 
+app = typer.Typer()
 
 def convert_name(name: str) -> str:
     name_translate = {
@@ -87,19 +88,19 @@ async def upload_sticker(file: str, directory: str, old_stickers: Dict[str, matr
     return sticker
 
 
-async def main(args: argparse.Namespace) -> None:
-    await matrix.load_config(args.config)
+async def main_func(config: str, title: Optional[str], id: Optional[str], add_to_index: Optional[str], path: str) -> None:
+    await matrix.load_config(config)
 
-    dirname = os.path.basename(os.path.abspath(args.path))
-    meta_path = os.path.join(args.path, "pack.json")
+    dirname = os.path.basename(os.path.abspath(path))
+    meta_path = os.path.join(path, "pack.json")
     try:
         with util.open_utf8(meta_path) as pack_file:
             pack = json.load(pack_file)
             print(f"Loaded existing pack meta from {meta_path}")
     except FileNotFoundError:
         pack = {
-            "title": args.title or dirname,
-            "id": args.id or convert_name(dirname),
+            "title": title or dirname,
+            "id": id or convert_name(dirname),
             "stickers": [],
         }
         old_stickers = {}
@@ -107,8 +108,8 @@ async def main(args: argparse.Namespace) -> None:
         old_stickers = {sticker["id"]: sticker for sticker in pack["stickers"]}
         pack["stickers"] = []
 
-    for file in sorted(os.listdir(args.path)):
-        sticker = await upload_sticker(file, args.path, old_stickers=old_stickers)
+    for file in sorted(os.listdir(path)):
+        sticker = await upload_sticker(file, path, old_stickers=old_stickers)
         if sticker:
             pack["stickers"].append(sticker)
 
@@ -116,30 +117,25 @@ async def main(args: argparse.Namespace) -> None:
         json.dump(pack, pack_file)
     print(f"Wrote pack to {meta_path}")
 
-    if args.add_to_index:
+    if add_to_index:
         picker_file_name = f"{pack['id']}.json"
-        picker_pack_path = os.path.join(args.add_to_index, picker_file_name)
+        picker_pack_path = os.path.join(add_to_index, picker_file_name)
         with util.open_utf8(picker_pack_path, "w") as pack_file:
             json.dump(pack, pack_file)
         print(f"Copied pack to {picker_pack_path}")
-        util.add_to_index(picker_file_name, args.add_to_index)
+        util.add_to_index(picker_file_name, add_to_index)
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--config",
-                    help="Path to JSON file with Matrix homeserver and access_token",
-                    type=str, default="config.json", metavar="file")
-parser.add_argument("--title", help="Override the sticker pack displayname", type=str,
-                    metavar="title")
-parser.add_argument("--id", help="Override the sticker pack ID", type=str, metavar="id")
-parser.add_argument("--add-to-index", help="Sticker picker pack directory (usually 'web/packs/')",
-                    type=str, metavar="path")
-parser.add_argument("path", help="Path to the sticker pack directory", type=str)
-
-
-def cmd():
-    asyncio.get_event_loop().run_until_complete(main(parser.parse_args()))
+@app.command()
+def main(
+    config: str = typer.Option("config.json", help="Path to JSON file with Matrix homeserver and access_token"),
+    title: Optional[str] = typer.Option(None, help="Override the sticker pack displayname"),
+    id: Optional[str] = typer.Option(None, help="Override the sticker pack ID"),
+    add_to_index: Optional[str] = typer.Option(None, help="Sticker picker pack directory (usually 'web/packs/')"),
+    path: str = typer.Argument(..., help="Path to the sticker pack directory")
+) -> None:
+    asyncio.get_event_loop().run_until_complete(main_func(config, title, id, add_to_index, path))
 
 
 if __name__ == "__main__":
-    cmd()
+    app()

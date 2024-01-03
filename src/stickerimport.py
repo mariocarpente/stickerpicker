@@ -13,12 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from typing import Dict
-import argparse
-import asyncio
+from typing import Dict, List
 import os.path
 import json
 import re
+import asyncio
+import typer
 
 from telethon import TelegramClient
 from telethon.tl.functions.messages import GetAllStickersRequest, GetStickerSetRequest
@@ -28,6 +28,7 @@ from telethon.tl.types.messages import StickerSet as StickerSetFull
 
 from .lib import matrix, util
 
+app = typer.Typer()
 
 async def reupload_document(client: TelegramClient, document: Document) -> matrix.StickerInfo:
     print(f"Reuploading {document.id}", end="", flush=True)
@@ -118,24 +119,13 @@ pack_url_regex = re.compile(r"^(?:(?:https?://)?(?:t|telegram)\.(?:me|dog)/addst
                             r"([A-Za-z0-9-_]+)"
                             r"(?:\.json)?$")
 
-parser = argparse.ArgumentParser()
 
-parser.add_argument("--list", help="List your saved sticker packs", action="store_true")
-parser.add_argument("--session", help="Telethon session file name", default="sticker-import")
-parser.add_argument("--config",
-                    help="Path to JSON file with Matrix homeserver and access_token",
-                    type=str, default="config.json")
-parser.add_argument("--output-dir", help="Directory to write packs to", default="web/packs/",
-                    type=str)
-parser.add_argument("pack", help="Sticker pack URLs to import", action="append", nargs="*")
-
-
-async def main(args: argparse.Namespace) -> None:
-    await matrix.load_config(args.config)
-    client = TelegramClient(args.session, 298751, "cb676d6bae20553c9996996a8f52b4d7")
+async def main_func(list: bool, session: str, config: str, output_dir: str, pack_list: list) -> None:
+    await matrix.load_config(config)
+    client = TelegramClient(session, 298751, "cb676d6bae20553c9996996a8f52b4d7")
     await client.start()
 
-    if args.list:
+    if list:
         stickers: AllStickers = await client(GetAllStickersRequest(hash=0))
         index = 1
         width = len(str(len(stickers.sets)))
@@ -144,26 +134,34 @@ async def main(args: argparse.Namespace) -> None:
             print(f"{index:>{width}}. {saved_pack.title} "
                   f"(t.me/addstickers/{saved_pack.short_name})")
             index += 1
-    elif args.pack[0]:
+    elif pack:
         input_packs = []
-        for pack_url in args.pack[0]:
+        for pack_url in pack:
             match = pack_url_regex.match(pack_url)
             if not match:
-                print(f"'{pack_url}' doesn't look like a sticker pack URL")
+                typer.echo(f"'{pack_url}' doesn't look like a sticker pack URL")
                 return
             input_packs.append(InputStickerSetShortName(short_name=match.group(1)))
         for input_pack in input_packs:
             pack: StickerSetFull = await client(GetStickerSetRequest(input_pack, hash=0))
-            await reupload_pack(client, pack, args.output_dir)
+            await reupload_pack(client, pack, output_dir)
     else:
-        parser.print_help()
+        typer.echo("Invalid command. Please use either --list or provide sticker pack URLs.")
+        typer.echo(typer.style("Use --help for more information.", fg=typer.colors.RED))
 
     await client.disconnect()
 
 
-def cmd() -> None:
-    asyncio.get_event_loop().run_until_complete(main(parser.parse_args()))
+@app.command()
+def main(
+    list: bool = typer.Option(False, help="List your saved sticker packs"),
+    session: str = typer.Option("sticker-import", help="Telethon session file name"),
+    config: str = typer.Option("config.json", help="Path to JSON file with Matrix homeserver and access_token"),
+    output_dir: str = typer.Option("web/packs/", help="Directory to write packs to"),
+    pack: List[str] = typer.Argument(..., help="Sticker pack URLs to import"),
+) -> None:
+    asyncio.get_event_loop().run_until_complete(main_func(list, session, config, output_dir, pack))
 
 
 if __name__ == "__main__":
-    cmd()
+    app()
