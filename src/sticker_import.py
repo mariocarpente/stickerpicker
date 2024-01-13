@@ -120,8 +120,8 @@ pack_url_regex = re.compile(r"^(?:(?:https?://)?(?:t|telegram)\.(?:me|dog)/addst
                             r"(?:\.json)?$")
 
 
-async def main_func(list: bool, session: str, config: str, output_dir: str, pack_list: list) -> None:
-    await matrix.load_config(config)
+async def main_func(list: bool, session: str, config: str, homeserver: str, access_token: str, output_dir: str, pack_list: list) -> None:
+    await matrix.load_config(config, False, homeserver, access_token)
     client = TelegramClient(session, 298751, "cb676d6bae20553c9996996a8f52b4d7")
     await client.start()
 
@@ -134,20 +134,17 @@ async def main_func(list: bool, session: str, config: str, output_dir: str, pack
             print(f"{index:>{width}}. {saved_pack.title} "
                   f"(t.me/addstickers/{saved_pack.short_name})")
             index += 1
-    elif pack:
+    elif pack_list:
         input_packs = []
-        for pack_url in pack:
+        for pack_url in pack_list:
             match = pack_url_regex.match(pack_url)
             if not match:
-                typer.echo(f"'{pack_url}' doesn't look like a sticker pack URL")
+                print(f"'{pack_url}' doesn't look like a sticker pack URL")
                 return
             input_packs.append(InputStickerSetShortName(short_name=match.group(1)))
         for input_pack in input_packs:
             pack: StickerSetFull = await client(GetStickerSetRequest(input_pack, hash=0))
             await reupload_pack(client, pack, output_dir)
-    else:
-        typer.echo("Invalid command. Please use either --list or provide sticker pack URLs.")
-        typer.echo(typer.style("Use --help for more information.", fg=typer.colors.RED))
 
     await client.disconnect()
 
@@ -155,12 +152,21 @@ async def main_func(list: bool, session: str, config: str, output_dir: str, pack
 @app.command()
 def main(
     list: bool = typer.Option(False, help="List your saved sticker packs"),
-    session: str = typer.Option("sticker-import", help="Telethon session file name"),
+    session: str = typer.Option("", help="Telethon session file name"),
     config: str = typer.Option("config.json", help="Path to JSON file with Matrix homeserver and access_token"),
-    output_dir: str = typer.Option("web/packs/", help="Directory to write packs to"),
-    pack: List[str] = typer.Argument(..., help="Sticker pack URLs to import"),
+    homeserver: str = typer.Option(None, help="Homeserver URL. Example: https://example.com"),
+    access_token: str = typer.Option(None, help="User access token"),
+    output_dir: str = typer.Option("packs/imported", help="Directory to write packs to"),
+    packs: List[str] = typer.Argument(default=None, help="Sticker pack URLs to import"),
 ) -> None:
-    asyncio.get_event_loop().run_until_complete(main_func(list, session, config, output_dir, pack))
+    if (homeserver == None and access_token != None) or  (homeserver != None and access_token == None) :
+        typer.echo("ERROR: The homeserver and access token must be sent together.")
+        raise typer.Exit(code=1)
+    if list or packs:
+        asyncio.get_event_loop().run_until_complete(main_func(list, session, config, homeserver, access_token, output_dir, packs))
+    else:
+        print("ERROR: Invalid command. Please use either --list or provide sticker pack URLs.")
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

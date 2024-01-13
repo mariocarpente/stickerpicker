@@ -13,6 +13,7 @@ Telethon = "1.24.0"
 cryptg = "0.3.1"
 python-magic = "0.4.25"
 typer = "^0.9.0"
+requests = "^2.31.0"
 
 [tool.poetry.dev-dependencies]
 
@@ -22,4 +23,5 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 import='src:import_pack'
-pack='src:add_pack'
+pack='src:pack'
+user='src:user'

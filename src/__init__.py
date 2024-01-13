@@ -1,12 +1,17 @@
 """Auxiliar module to run Poetry commands."""
-from .stickerimport import app as stickerimport_app
-from .pack import app as pack_app
+from .sticker_import import app as import_app
+from .sticker_pack import app as pack_app
+from .sticker_user import app as user_app
 
 
 def import_pack():
     """Run sticker-import"""
-    stickerimport_app()
+    import_app()
 
-def add_pack():
+def pack():
     """Run sticker-pack"""
     pack_app()
+
+def user():
+    """Run sticker-user"""
+    user_app()
