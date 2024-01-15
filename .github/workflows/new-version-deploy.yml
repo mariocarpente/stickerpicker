@@ -19,7 +19,6 @@ jobs:
       - name: Check if media branch exist and create
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        working-directory: runner
         run: |
           if git show-ref --verify --quiet "refs/heads/media"; then
             git checkout media
