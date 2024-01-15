@@ -21,8 +21,11 @@ jobs:
           if git show-ref --verify --quiet "refs/heads/media"; then
             git checkout media
             git fetch
+            echo "fetch"
           else
+            echo "Not exist"
             git checkout -b media
           fi
           git merge feature/deploy-actions
+          echo "push"
           git push origin media
