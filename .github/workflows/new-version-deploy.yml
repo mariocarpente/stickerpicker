@@ -20,7 +20,7 @@ jobs:
         run: |
           if git show-ref --verify --quiet "refs/heads/media"; then
             git checkout media
-            git pull
+            git fetch
           else
             git checkout -b media
           fi
