@@ -1,0 +1,34 @@
+---
+name: pages-deploy
+
+run-name: Merge media with pages
+
+on:
+  push:
+    branches:
+      - 'media'
+
+env:
+  SRC_BRANCH: 'media'
+  DEST_BRANCH: 'pages'
+
+jobs:
+  deploy:
+    runs-on: ["linux"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if pages branch exist and create
+        run: |
+          # Check if ${DEST_BRANCH} branch exist
+          if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
+            git checkout -b "${DEST_BRANCH}"
+          else
+            git checkout "${DEST_BRANCH}"
+          fi
+          git merge "${SRC_BRANCH}"
+          rm -r !(web)
+          mv web/* .
+          rm -r web
+          git push origin "${DEST_BRANCH}"
