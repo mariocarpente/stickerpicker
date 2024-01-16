@@ -1,7 +1,7 @@
 ---
 name: new-version-deploy
 
-run-name: Merge ${SRC_BRANCH} with ${DEST_BRANCH}
+run-name: Merge main with media
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check if ${DEST_BRANCH} branch exist and create
+      - name: Check if media branch exist and create
         run: |
           # Check if ${DEST_BRANCH} branch exist
           if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
