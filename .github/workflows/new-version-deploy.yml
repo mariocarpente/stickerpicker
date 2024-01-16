@@ -19,7 +19,7 @@ jobs:
       - name: Check if media branch exist and create
         run: |
           git pull
-          if git show-ref --verify --quiet "refs/heads/media"; then
+          if [[ -z $(git ls-remote --heads origin media) ]]; then
             git checkout media
             echo "Exist"
           else
