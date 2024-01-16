@@ -54,7 +54,7 @@ jobs:
             create \
             "${{ inputs.pack-name }}" \
             "${{ inputs.title }}" \
-            "${PACK_ID}"
+            ${PACK_ID}
 
       - name: Commit changes
         run: |
