@@ -16,7 +16,7 @@ on:
         description: "Homeserver domain"
         required: true
       sticker-url:
-        description: "URL where the stickers are deployed"
+        description: "URL where the stickers are deploye without https://"
         required: true
       all-packs:
         description: "All packs"
@@ -39,7 +39,7 @@ on:
         required: true
         type: string
       sticker-url:
-        description: "URL where the stickers are deployed"
+        description: "URL where the stickers are deployed without https://"
         required: true
         type: string
       all-packs:
