@@ -1,0 +1,63 @@
+---
+name: pack-create
+
+run-name: Creating pack ${{ inputs.pack-name }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      pack-name:
+        description: "Pack name"
+        required: true
+      title:
+        description: "Pack title displayed in stickerpicker"
+        required: true
+      id:
+        description: "Pack id (Default name)"
+
+  workflow_call:
+    inputs:
+      pack-name:
+        description: "Pack name"
+        required: true
+        type: string
+      title:
+        description: "Pack title displayed in stickerpicker"
+        required: true
+        type: string
+      id:
+        description: "Pack id (Default name)"
+        type: string
+
+
+jobs:
+  create-pack:
+    runs-on: ["linux"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: media
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Create pack
+        run: |
+          poetry install
+          if [[ -n "${{ inputs.id }}" ]]; then
+            export PACK_ID="--id ${{ inputs.id }}"
+          fi
+          poetry run \
+            pack \
+            create \
+            "${{ inputs.pack-name }}" \
+            "${{ inputs.title }}" \
+            "${PACK_ID}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Create new pack ${{ inputs.pack-name }}"
+          git push
