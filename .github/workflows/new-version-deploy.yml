@@ -29,6 +29,6 @@ jobs:
             git checkout "${DEST_BRANCH}"
           fi
           echo "hola"
-          git pull origin "${SRC_BRANCH}" -X theirs
+          git pull origin "${SRC_BRANCH}" -X theirs --merge --no-ff
           echo "Test"
           git push origin "${DEST_BRANCH}"
