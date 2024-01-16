@@ -25,7 +25,7 @@ jobs:
           if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
             git checkout -b "${DEST_BRANCH}"
           else
-            git merge --no-ff "${DEST_BRANCH}"
+            git merge --no-ff origin/"${DEST_BRANCH}"
             git checkout "${DEST_BRANCH}"
           fi
           git merge --no-ff "${SRC_BRANCH}"
