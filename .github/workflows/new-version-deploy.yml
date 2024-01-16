@@ -18,7 +18,6 @@ jobs:
 
       - name: Check if media branch exist and create
         run: |
-          git pull
           echo $(git branch --list media)
           echo $(git ls-remote --heads origin media)
           if [[ -z $(git ls-remote --heads origin media) ]]; then
@@ -27,6 +26,7 @@ jobs:
           else
             echo "Exist"
             git checkout media
+            git pull
           fi
           git merge feature/deploy-actions
           echo "push"
