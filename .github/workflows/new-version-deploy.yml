@@ -28,4 +28,5 @@ jobs:
             git checkout "${DEST_BRANCH}"
           fi
           git pull origin "${SRC_BRANCH}" -X theirs
+          echo "Test"
           git push origin "${DEST_BRANCH}"
