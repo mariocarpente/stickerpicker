@@ -8,6 +8,9 @@ on:
     branches:
       - 'feature/deploy-actions'
 
+env:
+  SRC_BRANCH: 'feature/deploy-actions'
+  DEST_BRANCH: 'media'
 
 jobs:
   deploy:
@@ -16,18 +19,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check if media branch exist and create
+      - name: Check if ${DEST_BRANCH} branch exist and create
         run: |
-          echo $(git branch --list media)
-          echo $(git ls-remote --heads origin media)
-          if [[ -z $(git ls-remote --heads origin media) ]]; then
-            echo "Not exist"
-            git checkout -b media
+          # Check if ${DEST_BRANCH} branch exist
+          if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
+            git checkout -b "${DEST_BRANCH}"
           else
-            echo "Exist"
-            git checkout media
-            git pull
+            git merge --no-ff "${DEST_BRANCH}"
+            git checkout "${DEST_BRANCH}"
           fi
-          git merge feature/deploy-actions
-          echo "push"
-          git push origin media
+          git merge --no-ff "${SRC_BRANCH}"
+          git push origin "${DEST_BRANCH}"
