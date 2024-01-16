@@ -75,8 +75,8 @@ jobs:
           poetry run \
             user \
             install \
+            "${S_PACKS}" \
             "${{ inputs.sticker-url }}" \
             "${{ inputs.homeserver }}" \
             "${{ inputs.username }}" \
-            "${ACCESS_TOKEN}" \
-            "${S_PACKS}"
+            "${ACCESS_TOKEN}"
