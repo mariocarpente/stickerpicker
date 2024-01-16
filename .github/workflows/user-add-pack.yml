@@ -1,0 +1,55 @@
+---
+name: user-add-pack
+
+run-name: Add packs ${{ inputs.packs }} to ${{ inputs.username }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+      packs:
+        description: "ID of the packs to add separate with space"
+        required: true
+
+  workflow_call:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+        type: string
+      packs:
+        description: "ID of the packs to add separate with space"
+        required: true
+        type: string
+
+
+jobs:
+  add-packs:
+    runs-on: ["linux"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: media
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install stickers to user
+        run: |
+          poetry install
+          poetry run \
+            user \
+            add-packs \
+            "${{ inputs.packs }}" \
+            --username \
+            "${{ inputs.username }}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Add new packs to ${{ inputs.username }}"
+          git push
