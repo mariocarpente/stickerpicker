@@ -25,8 +25,10 @@ jobs:
           if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
             git checkout -b "${DEST_BRANCH}"
           else
+            echo "cehck"
             git checkout "${DEST_BRANCH}"
           fi
+          echo "hola"
           git pull origin "${SRC_BRANCH}" -X theirs
           echo "Test"
           git push origin "${DEST_BRANCH}"
