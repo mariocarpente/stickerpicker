@@ -21,12 +21,12 @@ jobs:
           git pull
           echo $(git branch --list media)
           echo $(git ls-remote --heads origin media)
-          if [[ -z $(git branch --list media) ]]; then
-            git checkout media
-            echo "Exist"
-          else
+          if [[ -z $(git ls-remote --heads origin media) ]]; then
             echo "Not exist"
             git checkout -b media
+          else
+            echo "Exist"
+            git checkout media
           fi
           git merge feature/deploy-actions
           echo "push"
