@@ -71,6 +71,8 @@ jobs:
           poetry install
           if [[ "${{ inputs.all-packs }}" == "false" ]]; then
             export S_PACKS="-s"
+          else
+            export S_PACKS="-a"
           fi
           poetry run \
             user \
