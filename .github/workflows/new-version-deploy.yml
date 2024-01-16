@@ -27,5 +27,5 @@ jobs:
           else
             git checkout "${DEST_BRANCH}"
           fi
-          git merge --no-ff "${SRC_BRANCH}"
+          git merge --allow-unrelated-histories --no-ff "${SRC_BRANCH}"
           git push origin "${DEST_BRANCH}"
