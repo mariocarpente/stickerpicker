@@ -19,7 +19,7 @@ on:
         description: "URL where the stickers are deployed"
         required: true
       all-packs:
-        description: "All packs or selected?"
+        description: "All packs"
         required: true
         type: boolean
         default: true
@@ -43,7 +43,7 @@ on:
         required: true
         type: string
       all-packs:
-        description: "All packs or selected?"
+        description: "All packs"
         required: true
         type: boolean
         default: true
@@ -72,11 +72,11 @@ jobs:
           if [[ "${{ inputs.all-packs }}" == "false" ]]; then
             export S_PACKS="-s"
           fi
-          poetry run
-            user
-            install
-            "${{ inputs.sticker-url }}"
-            "${{ inputs.homeserver }}"
-            "${{ inputs.username }}"
-            "${ACCESS_TOKEN}"
+          poetry run \
+            user \
+            install \
+            "${{ inputs.sticker-url }}" \
+            "${{ inputs.homeserver }}" \
+            "${{ inputs.username }}" \
+            "${ACCESS_TOKEN}" \
             "${S_PACKS}"
