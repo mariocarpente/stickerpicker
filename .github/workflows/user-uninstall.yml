@@ -1,5 +1,5 @@
 ---
-name: uninstall-stickers
+name: user-uninstall
 
 run-name: Uninstall stickers to ${{ inputs.username }}...
 

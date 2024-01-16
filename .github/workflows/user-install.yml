@@ -1,5 +1,5 @@
 ---
-name: install-stickers
+name: user-install
 
 run-name: Install stickers to ${{ inputs.username }}...
 
