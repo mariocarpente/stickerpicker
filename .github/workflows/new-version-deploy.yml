@@ -1,5 +1,5 @@
 ---
-name: runner-deploy
+name: new-version-deploy
 
 run-name: Merge main with media
 
