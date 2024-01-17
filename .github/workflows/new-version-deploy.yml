@@ -11,15 +11,28 @@ on:
 env:
   SRC_BRANCH: 'feature/deploy-actions'
   DEST_BRANCH: 'media'
+  SCM_USER: ${{ secrets.SCM_USER }}
+  SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
 
 jobs:
   deploy:
-    runs-on: ["linux"]
+    runs-on: ["ubuntu-22.04"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Config git
+        run: |
+          # echo ${GPG_KEY} | gpg --import
+          git config --local user.name "${SCM_USER}"
+          git config --local user.email "${SCM_EMAIL}"
+          # git config --local commit.gpgsign true
 
       - name: Check if media branch exist and create
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Check if ${DEST_BRANCH} branch exist
           if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
@@ -29,6 +42,6 @@ jobs:
             git checkout "${DEST_BRANCH}"
           fi
           echo "hola"
-          git pull origin "${SRC_BRANCH}" -X theirs --rebase=false --no-ff
+          git merge "${SRC_BRANCH}" # github.head or ref
           echo "Test"
           git push origin "${DEST_BRANCH}"
