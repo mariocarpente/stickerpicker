@@ -9,7 +9,6 @@ on:
       - 'feature/deploy-actions'
 
 env:
-  SRC_BRANCH: 'feature/deploy-actions'
   DEST_BRANCH: 'media'
   SCM_USER: ${{ secrets.SCM_USER }}
   SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
@@ -40,5 +39,5 @@ jobs:
           else
             git checkout "${DEST_BRANCH}"
           fi
-          git merge "${SRC_BRANCH}" # github.head or ref
+          git merge "${{ github.ref }}"
           git push origin "${DEST_BRANCH}"
