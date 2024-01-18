@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: media
+          ref: pages
 
       - name: Install poetry
         run: |
