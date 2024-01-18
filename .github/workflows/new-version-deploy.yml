@@ -39,5 +39,6 @@ jobs:
           else
             git checkout "${DEST_BRANCH}"
           fi
+          echo "${{ github.ref }}"
           git merge "${{ github.ref }}"
           git push origin "${DEST_BRANCH}"
