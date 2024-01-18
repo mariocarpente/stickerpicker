@@ -13,7 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from typing import Dict, Optional
+from typing import Dict, List, Optional
+from pathlib import Path
 from hashlib import sha256
 import mimetypes
 import os.path
@@ -21,6 +22,7 @@ import asyncio
 import string
 import requests
 import json
+import shutil
 import typer  # Importa la librería Typer
 
 try:
@@ -301,6 +303,44 @@ def list_command(
     packs_dir: str = typer.Option('packs', help="Path to packs directory")
 ):
     list_available_packs(index_path, packs_dir)
+
+
+@app.command("add-imported", help="Add imported packs to web packs and index")
+def add_imported_command(
+    packs: List[Path] = typer.Argument(..., help="ID of the packs to add to web")
+):
+    output_dir = 'web/users'
+    for pack in packs:
+        found = False
+        upload = False
+        for root, dirs, files in os.walk("packs/imported"):
+            for file_name in files:
+                if file_name.endswith(".json"):
+                    file_path = os.path.join(root, file_name)
+                    with open(file_path, 'r') as json_file:
+                        try:
+                            data = json.load(json_file)
+                            if 'id' in data and data['id'] == pack.stem:
+                                found = True
+                                destination_file_path = os.path.join(f"{output_dir}/packs", file_name)
+                                if os.path.isfile(destination_file_path):
+                                    with open(file_path, 'rb') as file1, open(destination_file_path, 'rb') as file2:
+                                        if file1.read() == file2.read():
+                                            upload = True
+                                            print(f"Pack with id '{pack.stem}' already exist.")
+                                if not upload:
+                                    shutil.copyfile(file_path, destination_file_path)
+                                    util.add_to_index(pack.stem, output_dir)
+                        except json.JSONDecodeError:
+                            print(f"Error decoding JSON in file: {file_path}")
+                if found:
+                    break
+            if found:
+                break
+        if not found:
+            print(f"Error: Not exist pack with id '{pack.stem}'.")
+            raise typer.Exit(code=1)
+
 
 
 if __name__ == "__main__":
