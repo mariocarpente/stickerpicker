@@ -1,7 +1,7 @@
 ---
-name: new-version-deploy
+name: main-deploy
 
-run-name: Merge main with media
+run-name: Merge main with pages
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - 'feature/deploy-actions'
 
 env:
-  DEST_BRANCH: 'media'
+  DEST_BRANCH: 'pages'
   SCM_USER: ${{ secrets.SCM_USER }}
   SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
 
@@ -24,12 +24,12 @@ jobs:
 
       - name: Config git
         run: |
-          # echo ${GPG_KEY} | gpg --import
+          echo ${GPG_KEY} | gpg --import
           git config --local user.name "${SCM_USER}"
           git config --local user.email "${SCM_EMAIL}"
-          # git config --local commit.gpgsign true
+          git config --local commit.gpgsign true
 
-      - name: Check if media branch exist and create
+      - name: Check if pages branch exist and create
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
