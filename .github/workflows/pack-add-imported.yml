@@ -1,0 +1,46 @@
+---
+name: pack-add-imported
+
+run-name: Add imported packs ${{ inputs.pack-ids }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      pack-ids:
+        description: "Pack IDs separate with white space"
+        required: true
+
+  workflow_call:
+    inputs:
+      pack-ids:
+        description: "Pack IDs separate with white space"
+        required: true
+        type: string
+
+
+jobs:
+  add-image:
+    runs-on: ["linux"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: pages
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Import packs
+        run: |
+          poetry install
+          poetry run \
+            pack \
+            add-imported \
+            "${{ inputs.pack-ids }}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "feat: Add imported packs ${{ inputs.pack-ids }}"
+          git push
