@@ -84,7 +84,7 @@ jobs:
             packs/"${{ inputs.pack-id }}" \
             "${{ inputs.image-name }}" \
             --homeserver "${{ inputs.homeserver }}"
-            --access-token "${{ inputs.access-token }}"
+            --access-token "${ACCESS_TOKEN}"
 
       - name: Config git
         env:
