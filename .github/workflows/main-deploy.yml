@@ -6,7 +6,7 @@ run-name: Merge main with pages
 on:
   push:
     branches:
-      - 'main'
+      - 'feature/deploy-actions'
 
 env:
   DEST_BRANCH: 'pages'
@@ -38,4 +38,5 @@ jobs:
             git checkout "${DEST_BRANCH}"
           fi
           git merge "${{ github.ref }}"
+          cp packs/imported/* web/users/packs/
           git push origin "${DEST_BRANCH}"
