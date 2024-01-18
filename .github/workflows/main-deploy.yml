@@ -6,7 +6,7 @@ run-name: Merge main with pages
 on:
   push:
     branches:
-      - 'feature/deploy-actions'
+      - 'main'
 
 env:
   DEST_BRANCH: 'pages'
@@ -23,14 +23,9 @@ jobs:
           fetch-depth: 0
 
       - name: Config git
-        env:
-          GPG_KEY: ${{ secrets.GPG_KEY }}
-          GPG_PASS: ${{ secrets.GPG_PASS }}
         run: |
-          echo -e "${GPG_KEY}" | gpg --batch --yes --passphrase "${GPG_PASS}" --import --allow-secret-key-import --import-options import-show
           git config --local user.name "${SCM_USER}"
           git config --local user.email "${SCM_EMAIL}"
-          git config --local commit.gpgsign true
 
       - name: Check if pages branch exist and create
         env:
@@ -42,6 +37,5 @@ jobs:
           else
             git checkout "${DEST_BRANCH}"
           fi
-          echo "${{ github.ref }}"
           git merge "${{ github.ref }}"
           git push origin "${DEST_BRANCH}"
