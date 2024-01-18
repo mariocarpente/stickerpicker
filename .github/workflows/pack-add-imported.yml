@@ -39,6 +39,14 @@ jobs:
             add-imported \
             "${{ inputs.pack-ids }}"
 
+      - name: Config git
+        env:
+          SCM_USER: ${{ secrets.SCM_USER }}
+          SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
+        run: |
+          git config --local user.name "${SCM_USER}"
+          git config --local user.email "${SCM_EMAIL}"
+
       - name: Commit changes
         run: |
           git add .
