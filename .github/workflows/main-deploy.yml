@@ -39,4 +39,6 @@ jobs:
           fi
           git merge "${{ github.ref }}"
           cp packs/imported/* web/users/packs/
+          git add web/users
+          git commit -m "feat: Add new imported packs"
           git push origin "${DEST_BRANCH}"
