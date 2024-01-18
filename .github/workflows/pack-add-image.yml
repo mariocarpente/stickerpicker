@@ -82,7 +82,7 @@ jobs:
             pack \
             upload \
             "packs/${{ inputs.pack-id }}" \
-            --homeserver "${{ inputs.homeserver }}"
+            --homeserver "${{ inputs.homeserver }}" \
             --access-token "${ACCESS_TOKEN}"
 
       - name: Config git
