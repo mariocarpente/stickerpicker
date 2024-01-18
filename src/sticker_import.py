@@ -103,7 +103,7 @@ async def reupload_pack(client: TelegramClient, pack: StickerSetFull, output_dir
     with util.open_utf8(pack_path, "w") as pack_file:
         json.dump({
             "title": pack.set.title,
-            "id": f"tg-{pack.set.id}",
+            "id": pack.set.short_name, # f"tg-{pack.set.id}",
             "net.maunium.telegram.pack": {
                 "short_name": pack.set.short_name,
                 "hash": str(pack.set.hash),
