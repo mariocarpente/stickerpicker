@@ -23,8 +23,11 @@ jobs:
           fetch-depth: 0
 
       - name: Config git
+        env:
+          GPG_KEY: ${{ secrets.GPG_KEY }}
+          GPG_PASS: ${{ secrets.GPG_PASS }}
         run: |
-          echo ${GPG_KEY} | gpg --import
+          echo -e "${GPG_KEY}" | gpg --batch --yes --passphrase "${GPG_PASS}" --import --allow-secret-key-import --import-options import-show
           git config --local user.name "${SCM_USER}"
           git config --local user.email "${SCM_EMAIL}"
           git config --local commit.gpgsign true
