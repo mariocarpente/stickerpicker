@@ -82,7 +82,6 @@ jobs:
             pack \
             upload \
             packs/"${{ inputs.pack-id }}" \
-            "${{ inputs.image-name }}" \
             --homeserver "${{ inputs.homeserver }}"
             --access-token "${ACCESS_TOKEN}"
 
