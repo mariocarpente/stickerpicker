@@ -16,6 +16,7 @@ def add_packs_to_user(username: str, packs: List[Path], output_dir: str = "web/u
             util.add_to_index(pack.stem, output_dir,f"{username}.json")
         else:
             print(f"Pack {pack.stem} not found in {output_dir}")
+            raise typer.Exit(code=1)
 
 
 def del_packs_to_user(username: str, packs: List[Path], output_dir: str = "web/users") -> None:
