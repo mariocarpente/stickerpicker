@@ -16,7 +16,7 @@ on:
         description: "Image URL"
         required: true
       homeserver:
-        description: "Homeserver domain"
+        description: "Homeserver URL"
         required: true
       access-token:
         description: "Service User Token (Not User token)"
@@ -37,7 +37,7 @@ on:
         required: true
         type: string
       homeserver:
-        description: "Homeserver domain"
+        description: "Homeserver URL"
         required: true
         type: string
       access-token:
