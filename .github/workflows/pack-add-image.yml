@@ -1,0 +1,87 @@
+---
+name: pack-add-image
+
+run-name: Add ${{ inputs.image-name }} to pack ${{ inputs.pack-id }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      pack-id:
+        description: "Pack ID"
+        required: true
+      image-name:
+        description: "Image name"
+        required: true
+      image-url:
+        description: "Image URL"
+        required: true
+      homeserver:
+        description: "Homeserver domain"
+        required: true
+      access-token:
+        description: "Service User Token (Not User token)"
+        required: true
+
+  workflow_call:
+    inputs:
+      pack-id:
+        description: "Pack ID"
+        required: true
+        type: string
+      image-name:
+        description: "Image name"
+        required: true
+        type: string
+      image-url:
+        description: "Image URL"
+        required: true
+        type: string
+      homeserver:
+        description: "Homeserver domain"
+        required: true
+        type: string
+      access-token:
+        description: "Service User Token (Not User token)"
+        required: true
+        type: string
+
+
+jobs:
+  add-image:
+    runs-on: ["linux"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: pages
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Create pack
+        run: |
+          poetry install
+          poetry run \
+            pack \
+            add-image \
+            "${{ inputs.pack-id }}" \
+            "${{ inputs.image-name }}" \
+            --image-url "${{ inputs.image-url }}"
+
+      - name: Upload pack
+        run: |
+          poetry install
+          poetry run \
+            pack \
+            upload \
+            packs/"${{ inputs.pack-id }}" \
+            "${{ inputs.image-name }}" \
+            --homeserver "${{ inputs.homeserver }}"
+            --access-token "${{ inputs.access-token }}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "feat: Add image ${{ inputs.image-name }} to pack ${{ inputs.pack-id }}"
+          git push
