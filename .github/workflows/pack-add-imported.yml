@@ -20,7 +20,7 @@ on:
 
 jobs:
   add-image:
-    runs-on: ["linux"]
+    runs-on: ["ubuntu-latest"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

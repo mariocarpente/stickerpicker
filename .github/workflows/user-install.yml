@@ -51,7 +51,7 @@ on:
 
 jobs:
   install-stickers:
-    runs-on: ["linux"]
+    runs-on: ["ubuntu-latest"]
     steps:
       - name: Mask access-token
         run: |

@@ -32,7 +32,7 @@ on:
 
 jobs:
   create-pack:
-    runs-on: ["linux"]
+    runs-on: ["ubuntu-latest"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
