@@ -49,7 +49,7 @@ def install_command(
     port: Optional[str] = typer.Option('8448', help="Synapse port"),
     selected:  Annotated[bool, typer.Option("--selected/--all", "-s/-a", help="Install only selected user packs.")] = False) -> None:
     try:
-        user_param = '' if selected else '&user={username}'
+        user_param = f'&user={username}' if selected else ''
 
         body = {
             "stickerpicker": {
@@ -68,7 +68,7 @@ def install_command(
         asyncio.get_event_loop().run_until_complete(matrix.send_event_widget(body, username, homeserver, access_token, port))
 
         if selected:
-            util.add_to_index(None, "web/users",f"{username}.json")
+            util.add_to_index(None, "web/users",f"{username}.json", homeserver)
 
         print(f"Stickerpicker installed successfully for user {username}")
     except Exception as e:

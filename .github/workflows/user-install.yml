@@ -61,6 +61,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: pages
 
       - name: Install poetry
         run: |
@@ -82,3 +84,25 @@ jobs:
             "${{ inputs.homeserver }}" \
             "${{ inputs.username }}" \
             "${ACCESS_TOKEN}"
+
+      - name: Check if user JSON created
+        run: |
+          if [[ -n $(git status --porcelain=v2) ]]; then
+            echo "CHANGED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Config git
+        if: ${{ env.CHANGED == 'true' }}
+        env:
+          SCM_USER: ${{ secrets.SCM_USER }}
+          SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
+        run: |
+          git config --local user.name "${SCM_USER}"
+          git config --local user.email "${SCM_EMAIL}"
+
+      - name: Commit changes
+        if: ${{ env.CHANGED == 'true' }}
+        run: |
+          git add .
+          git commit -m "feat: Add new sticker selection to ${{ inputs.username }}"
+          git push
