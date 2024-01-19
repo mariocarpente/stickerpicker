@@ -49,7 +49,7 @@ def install_command(
     port: Optional[str] = typer.Option('8448', help="Synapse port"),
     selected:  Annotated[bool, typer.Option("--selected/--all", "-s/-a", help="Install only selected user packs.")] = False) -> None:
     try:
-        user_param = '' if selected else '&user={username}'
+        user_param = f'&user={username}' if selected else ''
 
         body = {
             "stickerpicker": {
