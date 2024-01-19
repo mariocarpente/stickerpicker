@@ -47,10 +47,11 @@ def add_to_index(name: str, output_dir: str, filename: str = "index.json", homes
             index_data = json.load(index_file)
     except (FileNotFoundError, json.JSONDecodeError):
         index_data = {"packs": []}
-    if "homeserver_url" not in index_data and (matrix.homeserver_url or homeserver):
+    if "homeserver_url" not in index_data:
         if homeserver:
-            homeserver = f"https://{homeserver}"
-        index_data["homeserver_url"] = matrix.homeserver_url
+            index_data["homeserver_url"] = f"https://{homeserver}"
+        elif matrix.homeserver_url:
+            index_data["homeserver_url"] = matrix.homeserver_url
     if name not in index_data["packs"]:
         if name:
             index_data["packs"].append(name)
