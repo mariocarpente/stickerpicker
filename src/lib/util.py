@@ -40,20 +40,49 @@ def convert_image(data: bytes) -> (bytes, int, int):
     return new_file.getvalue(), w, h
 
 
-def add_to_index(name: str, output_dir: str) -> None:
-    index_path = os.path.join(output_dir, "index.json")
+def add_to_index(name: str, output_dir: str, filename: str = "index.json", homeserver: str = None) -> None:
+    index_path = os.path.join(output_dir, filename)
     try:
         with open_utf8(index_path) as index_file:
             index_data = json.load(index_file)
     except (FileNotFoundError, json.JSONDecodeError):
         index_data = {"packs": []}
-    if "homeserver_url" not in index_data and matrix.homeserver_url:
+    if "homeserver_url" not in index_data and (matrix.homeserver_url or homeserver):
+        if homeserver:
+            homeserver = f"https://{homeserver}"
         index_data["homeserver_url"] = matrix.homeserver_url
     if name not in index_data["packs"]:
-        index_data["packs"].append(name)
+        if name:
+            index_data["packs"].append(name)
         with open_utf8(index_path, "w") as index_file:
             json.dump(index_data, index_file, indent="  ")
         print(f"Added {name} to {index_path}")
+    else:
+        print(f"Pack {name} already add to {index_path}")
+
+
+def remove_from_index(name: str, output_dir: str, filename: str = "index.json") -> None:
+    index_path = os.path.join(output_dir, filename)
+
+    try:
+        with open_utf8(index_path) as index_file:
+            index_data = json.load(index_file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        print(f"Error: {index_path} not found or invalid JSON format.")
+        return
+
+    if "homeserver_url" not in index_data and matrix.homeserver_url:
+        index_data["homeserver_url"] = matrix.homeserver_url
+
+    if name in index_data["packs"]:
+        index_data["packs"].remove(name)
+
+        with open_utf8(index_path, "w") as index_file:
+            json.dump(index_data, index_file, indent="  ")
+
+        print(f"Removed {name} from {index_path}")
+    else:
+        print(f"Pack {name} not found in {index_path}")
 
 
 def make_sticker(mxc: str, width: int, height: int, size: int,

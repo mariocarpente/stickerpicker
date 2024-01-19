@@ -1,0 +1,60 @@
+---
+name: user-uninstall
+
+run-name: Uninstall stickers to ${{ inputs.username }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+      access-token:
+        description: "User Access Token (Settings->Help&About->Advanced)"
+        required: true
+      homeserver:
+        description: "Homeserver domain"
+        required: true
+
+  workflow_call:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+        type: string
+      access-token:
+        description: "User Access Token (Settings->Help&About->Advanced)"
+        required: true
+        type: string
+      homeserver:
+        description: "Homeserver domain"
+        required: true
+        type: string
+
+
+jobs:
+  uninstall-stickers:
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - name: Mask access-token
+        run: |
+          ACCESS_TOKEN=$(grep -Po '"access-token": "\K[^"]+' $GITHUB_EVENT_PATH)
+          echo ::add-mask::$ACCESS_TOKEN
+          echo ACCESS_TOKEN=$ACCESS_TOKEN >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install stickers to user
+        run: |
+          poetry install
+          poetry run \
+            user \
+            uninstall \
+            "${{ inputs.username }}" \
+            "${ACCESS_TOKEN}" \
+            "${{ inputs.homeserver }}"

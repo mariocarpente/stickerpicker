@@ -1,0 +1,100 @@
+---
+name: pack-add-image
+
+run-name: Add ${{ inputs.image-name }} to pack ${{ inputs.pack-id }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      pack-id:
+        description: "Pack ID"
+        required: true
+      image-name:
+        description: "Image name"
+        required: true
+      image-url:
+        description: "Image URL"
+        required: true
+      homeserver:
+        description: "Homeserver URL"
+        required: true
+      access-token:
+        description: "Service User Token (Not User token)"
+        required: true
+
+  workflow_call:
+    inputs:
+      pack-id:
+        description: "Pack ID"
+        required: true
+        type: string
+      image-name:
+        description: "Image name"
+        required: true
+        type: string
+      image-url:
+        description: "Image URL"
+        required: true
+        type: string
+      homeserver:
+        description: "Homeserver URL"
+        required: true
+        type: string
+      access-token:
+        description: "Service User Token (Not User token)"
+        required: true
+        type: string
+
+
+jobs:
+  add-image:
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - name: Mask access-token
+        run: |
+          ACCESS_TOKEN=$(grep -Po '"access-token": "\K[^"]+' $GITHUB_EVENT_PATH)
+          echo ::add-mask::$ACCESS_TOKEN
+          echo ACCESS_TOKEN=$ACCESS_TOKEN >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: pages
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Create pack
+        run: |
+          poetry install
+          poetry run \
+            pack \
+            add-image \
+            "${{ inputs.pack-id }}" \
+            "${{ inputs.image-name }}" \
+            --image-url "${{ inputs.image-url }}"
+
+      - name: Upload pack
+        run: |
+          poetry install
+          poetry run \
+            pack \
+            upload \
+            "packs/${{ inputs.pack-id }}" \
+            --homeserver "${{ inputs.homeserver }}" \
+            --access-token "${ACCESS_TOKEN}"
+
+      - name: Config git
+        env:
+          SCM_USER: ${{ secrets.SCM_USER }}
+          SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
+        run: |
+          git config --local user.name "${SCM_USER}"
+          git config --local user.email "${SCM_EMAIL}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "feat: Add image ${{ inputs.image-name }} to pack ${{ inputs.pack-id }}"
+          git push

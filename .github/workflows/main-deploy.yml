@@ -1,0 +1,41 @@
+---
+name: main-deploy
+
+run-name: Merge main with pages
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  DEST_BRANCH: 'pages'
+  SCM_USER: ${{ secrets.SCM_USER }}
+  SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
+
+jobs:
+  deploy:
+    runs-on: ["ubuntu-22.04"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Config git
+        run: |
+          git config --local user.name "${SCM_USER}"
+          git config --local user.email "${SCM_EMAIL}"
+
+      - name: Check if pages branch exist and create
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if ${DEST_BRANCH} branch exist
+          if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
+            git checkout -b "${DEST_BRANCH}"
+          else
+            git checkout "${DEST_BRANCH}"
+          fi
+          git merge "${{ github.ref }}"
+          git push origin "${DEST_BRANCH}"

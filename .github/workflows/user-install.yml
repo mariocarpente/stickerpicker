@@ -1,0 +1,84 @@
+---
+name: user-install
+
+run-name: Install stickers to ${{ inputs.username }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+      access-token:
+        description: "User Access Token (Settings->Help&About->Advanced)"
+        required: true
+      homeserver:
+        description: "Homeserver domain"
+        required: true
+      sticker-url:
+        description: "URL where the stickers are deploye without https://"
+        required: true
+      all-packs:
+        description: "All packs"
+        required: true
+        type: boolean
+        default: true
+
+  workflow_call:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+        type: string
+      access-token:
+        description: "User Access Token (Settings->Help&About->Advanced)"
+        required: true
+        type: string
+      homeserver:
+        description: "Homeserver domain"
+        required: true
+        type: string
+      sticker-url:
+        description: "URL where the stickers are deployed without https://"
+        required: true
+        type: string
+      all-packs:
+        description: "All packs"
+        required: true
+        type: boolean
+        default: true
+
+
+jobs:
+  install-stickers:
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - name: Mask access-token
+        run: |
+          ACCESS_TOKEN=$(grep -Po '"access-token": "\K[^"]+' $GITHUB_EVENT_PATH)
+          echo ::add-mask::$ACCESS_TOKEN
+          echo ACCESS_TOKEN=$ACCESS_TOKEN >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install stickers to user
+        run: |
+          poetry install
+          if [[ "${{ inputs.all-packs }}" == "false" ]]; then
+            export S_PACKS="-s"
+          else
+            export S_PACKS="-a"
+          fi
+          poetry run \
+            user \
+            install \
+            "${S_PACKS}" \
+            "${{ inputs.sticker-url }}" \
+            "${{ inputs.homeserver }}" \
+            "${{ inputs.username }}" \
+            "${ACCESS_TOKEN}"

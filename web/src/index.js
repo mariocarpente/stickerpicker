@@ -20,10 +20,11 @@ import * as widgetAPI from "./widget-api.js"
 import * as frequent from "./frequently-used.js"
 
 // The base URL for fetching packs. The app will first fetch ${PACK_BASE_URL}/index.json,
-// then ${PACK_BASE_URL}/${packFile} for each packFile in the packs object of the index.json file.
-const PACKS_BASE_URL = "packs"
+// then ${PACK_BASE_URL}/${packFile} for each packFile in the packs object of the index.json file..
+const USERS_BASE_URL = "users"
+const PACKS_BASE_URL = `${USERS_BASE_URL}/packs`
 
-let INDEX = `${PACKS_BASE_URL}/index.json`
+let INDEX = `${USERS_BASE_URL}/index.json`
 const params = new URLSearchParams(document.location.search)
 if (params.has('config')) {
 	INDEX = params.get("config")
@@ -55,6 +56,7 @@ class App extends Component {
 			packs: defaultState.packs,
 			loading: true,
 			error: null,
+			indexPath: `${USERS_BASE_URL}/${params.get("user")}.json`,
 			stickersPerRow: parseInt(localStorage.mauStickersPerRow || "4"),
 			theme: localStorage.mauStickerThemeOverride || this.defaultTheme,
 			frequentlyUsed: {
@@ -154,35 +156,41 @@ class App extends Component {
 
 	_loadPacks(disableCache = false) {
 		const cache = disableCache ? "no-cache" : undefined
-		fetch(INDEX, { cache }).then(async indexRes => {
-			if (indexRes.status >= 400) {
-				this.setState({
-					loading: false,
-					error: indexRes.status !== 404 ? indexRes.statusText : null,
-				})
-				return
-			}
-			const indexData = await indexRes.json()
-			HOMESERVER_URL = indexData.homeserver_url || HOMESERVER_URL
-			// TODO only load pack metadata when scrolled into view?
-			for (const packFile of indexData.packs) {
-				let packRes
-				if (packFile.startsWith("https://") || packFile.startsWith("http://")) {
-					packRes = await fetch(packFile, { cache })
-				} else {
-					packRes = await fetch(`${PACKS_BASE_URL}/${packFile}`, { cache })
-				}
-				const packData = await packRes.json()
-				for (const sticker of packData.stickers) {
-					this.stickersByID.set(sticker.id, sticker)
-				}
-				this.setState({
-					packs: [...this.state.packs, packData],
-					loading: false,
-				})
-			}
-			this.updateFrequentlyUsed()
-		}, error => this.setState({ loading: false, error }))
+		fetch(this.state.indexPath)
+			.then(response => {
+					if (response.ok) {
+						INDEX = this.state.indexPath
+					}
+					fetch(INDEX, { cache }).then(async indexRes => {
+						if (indexRes.status >= 400) {
+							this.setState({
+								loading: false,
+								error: indexRes.status !== 404 ? indexRes.statusText : null,
+							})
+							return
+						}
+						const indexData = await indexRes.json()
+						HOMESERVER_URL = indexData.homeserver_url || HOMESERVER_URL
+						// TODO only load pack metadata when scrolled into view?
+						for (const packFile of indexData.packs) {
+							let packRes
+							if (packFile.startsWith("https://") || packFile.startsWith("http://")) {
+								packRes = await fetch(packFile, { cache })
+							} else {
+								packRes = await fetch(`${PACKS_BASE_URL}/${packFile}`, { cache })
+							}
+							const packData = await packRes.json()
+							for (const sticker of packData.stickers) {
+								this.stickersByID.set(sticker.id, sticker)
+							}
+							this.setState({
+								packs: [...this.state.packs, packData],
+								loading: false,
+							})
+						}
+						this.updateFrequentlyUsed()
+					}, error => this.setState({ loading: false, error }))
+			})
 	}
 
 	componentDidMount() {

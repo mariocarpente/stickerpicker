@@ -48,28 +48,35 @@ else:
     StickerInfo = None
 
 
-async def load_config(path: str) -> None:
+async def load_config(path: str, write_conf: bool = False, homeserver: str = None, token: str = None) -> None:
     global access_token, homeserver_url, upload_url
     try:
-        with open(path) as config_file:
-            config = json.load(config_file)
-            homeserver_url = config["homeserver"]
-            access_token = config["access_token"]
+        print("Checking manual homeserver and access token...")
+        if homeserver == None or token == None :
+            print("Not found manual homeserver and access token.")
+            print(f"Checking config file {path}...")
+            with open(path) as config_file:
+                config = json.load(config_file)
+                homeserver_url = config["homeserver"]
+                access_token = config["access_token"]
+        else:
+            homeserver_url = homeserver
+            access_token = token
+            whoami_url = URL(homeserver_url) / "_matrix" / "client" / "r0" / "account" / "whoami"
+            if whoami_url.scheme not in ("https", "http"):
+                whoami_url = whoami_url.with_scheme("https")
+            user_id = await whoami(whoami_url, access_token)
+            if write_conf:
+                with open(path, "w") as config_file:
+                    json.dump({
+                        "homeserver": homeserver_url,
+                        "user_id": user_id,
+                        "access_token": access_token
+                    }, config_file)
+                print(f"Wrote config to {path}")
     except FileNotFoundError:
-        print("Matrix config file not found. Please enter your homeserver and access token.")
-        homeserver_url = input("Homeserver URL: ")
-        access_token = input("Access token: ")
-        whoami_url = URL(homeserver_url) / "_matrix" / "client" / "r0" / "account" / "whoami"
-        if whoami_url.scheme not in ("https", "http"):
-            whoami_url = whoami_url.with_scheme("https")
-        user_id = await whoami(whoami_url, access_token)
-        with open(path, "w") as config_file:
-            json.dump({
-                "homeserver": homeserver_url,
-                "user_id": user_id,
-                "access_token": access_token
-            }, config_file)
-        print(f"Wrote config to {path}")
+        print("Matrix config file not found.")
+        raise Exception("There is no configuration file, the homeserver or the access token has not been passed manually.")
 
     upload_url = URL(homeserver_url) / "_matrix" / "media" / "r0" / "upload"
 
@@ -88,3 +95,15 @@ async def upload(data: bytes, mimetype: str, filename: str) -> str:
     headers = {"Content-Type": mimetype, "Authorization": f"Bearer {access_token}"}
     async with ClientSession() as sess, sess.post(url, data=data, headers=headers) as resp:
         return (await resp.json())["content_uri"]
+
+
+async def send_event_widget(body: str, username: str, homeserver: str, token: str, port: str = '8448') -> None:
+
+    url = f"https://{homeserver}:{port}/_matrix/client/v3/user/@{username}:{homeserver}/account_data/m.widgets"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    async with ClientSession() as sess, sess.put(url, headers=headers, json=body) as response:
+            response.raise_for_status()

@@ -1,0 +1,63 @@
+---
+name: user-del-pack
+
+run-name: Remove packs ${{ inputs.packs }} to ${{ inputs.username }}...
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+      packs:
+        description: "ID of the packs to remove separate with space"
+        required: true
+
+  workflow_call:
+    inputs:
+      username:
+        description: "Username in Matrix Server without @ and domain"
+        required: true
+        type: string
+      packs:
+        description: "ID of the packs to remove separate with space"
+        required: true
+        type: string
+
+
+jobs:
+  del-packs:
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: pages
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Remove packs to user
+        run: |
+          poetry install
+          poetry run \
+            user \
+            del-packs \
+            "${{ inputs.packs }}" \
+            --username \
+            "${{ inputs.username }}"
+
+      - name: Config git
+        env:
+          SCM_USER: ${{ secrets.SCM_USER }}
+          SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
+        run: |
+          git config --local user.name "${SCM_USER}"
+          git config --local user.email "${SCM_EMAIL}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Add new packs to ${{ inputs.username }}"
+          git push
