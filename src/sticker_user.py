@@ -68,7 +68,7 @@ def install_command(
         asyncio.get_event_loop().run_until_complete(matrix.send_event_widget(body, username, homeserver, access_token, port))
 
         if selected:
-            util.add_to_index(None, "web/users",f"{username}.json")
+            util.add_to_index(None, "web/users",f"{username}.json", homeserver)
 
         print(f"Stickerpicker installed successfully for user {username}")
     except Exception as e:
