@@ -1,20 +1,3 @@
 # packs
 
-This directory contains some ready-to-use stickerpack metadata. Currently
-it's just all the packs imported from Scalar (the default integration manager).
-
-To use these, copy the packs you want to `web/packs/`, then edit
-`web/packs/index.json` to include the file names you copied in the `packs`
-array. The index.json file should look something like this:
-
-```json
-{
-  "homeserver_url": "https://example.com",
-  "packs": [
-    "your_telegram_imported_pack.json",
-    "another_telegram_imported_pack.json",
-    "scalar-rabbit.json",
-    "scalar-loading_artist.json"
-  ]
-}
-```
+This directory stores the sticker packs before uploading them to the server. The `imported` folder stores those imported from Telegram and those from Scalar (the default integration manager).
