@@ -1,5 +1,5 @@
 ---
-name: user-add-pack
+name: user-add-packs
 
 run-name: Add packs ${{ inputs.packs }} to ${{ inputs.username }}...
 
@@ -57,6 +57,8 @@ jobs:
           git config --local user.email "${SCM_EMAIL}"
 
       - name: Commit changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_SCM_TOKEN }}
         run: |
           git add .
           git commit -m "Add new packs to ${{ inputs.username }}"

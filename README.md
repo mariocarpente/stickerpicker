@@ -34,6 +34,7 @@ To use this utility you need to have installed
 Define as secrets in the repository:
 - `SCM_USER`: GitHub user name.
 - `SCM_EMAIL`: GitHub user email.
+- `GH_SCM_TOKEN`: GitHub user token with repo permissions.
 
 These are used in GitHub workflows.
 
@@ -171,7 +172,7 @@ Arguments:
 Options:
 * `--username`: User name without `@` and `:domain` (required)
 
-You can also run this [workflow](https://github.com/mariocarpente/stickerpicker/actions/workflows/user-add-pack.yml)
+You can also run this [workflow](https://github.com/mariocarpente/stickerpicker/actions/workflows/user-add-packs.yml)
 
 ### **Delete pack a user**
 Execute the following command:

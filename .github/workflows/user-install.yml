@@ -102,6 +102,8 @@ jobs:
 
       - name: Commit changes
         if: ${{ env.CHANGED == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_SCM_TOKEN }}
         run: |
           git add .
           git commit -m "feat: Add new sticker selection to ${{ inputs.username }}"
