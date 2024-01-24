@@ -63,7 +63,11 @@ jobs:
         run: |
           git config --local user.name "${SCM_USER}"
           git config --local user.email "${SCM_EMAIL}"
-          git commit -a -m "Create new pack ${{ inputs.pack-name }}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Create new pack ${{ inputs.pack-name }}"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
