@@ -63,6 +63,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: pages
+          persist-credentials: false
 
       - name: Install poetry
         run: |
@@ -102,9 +103,12 @@ jobs:
 
       - name: Commit changes
         if: ${{ env.CHANGED == 'true' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_SCM_TOKEN }}
         run: |
           git add .
           git commit -m "feat: Add new sticker selection to ${{ inputs.username }}"
-          git push
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_SCM_TOKEN }}
+          branch: pages

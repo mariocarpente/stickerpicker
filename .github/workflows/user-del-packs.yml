@@ -33,6 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: pages
+          persist-credentials: false
 
       - name: Install poetry
         run: |
@@ -57,9 +58,12 @@ jobs:
           git config --local user.email "${SCM_EMAIL}"
 
       - name: Commit changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_SCM_TOKEN }}
         run: |
           git add .
           git commit -m "Add new packs to ${{ inputs.username }}"
-          git push
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_SCM_TOKEN }}
+          branch: pages
