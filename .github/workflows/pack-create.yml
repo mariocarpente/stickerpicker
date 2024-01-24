@@ -57,7 +57,7 @@ jobs:
             "${{ inputs.title }}" \
             ${PACK_ID}
 
-      - name: Config git and commit changes
+      - name: Config git
         env:
           SCM_USER: ${{ secrets.SCM_USER }}
           SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
