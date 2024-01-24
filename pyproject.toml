@@ -5,15 +5,15 @@ description = "Multi user stickerpicker"
 authors = ["Tulir Asokan", "MCV"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-aiohttp = "3.8.1"
-yarl = "1.7.2"
-Pillow = "9.1.1"
-Telethon = "1.24.0"
-cryptg = "0.3.1"
-python-magic = "0.4.25"
+python = "^3.10"
+Telethon = "^1.24.0"
+python-magic = "^0.4.25"
 typer = "^0.9.0"
 requests = "^2.31.0"
+yarl = "^1.9.4"
+pillow = "^10.2.0"
+cryptg = "^0.4.0"
+aiohttp = "^3.9.1"
 
 [tool.poetry.dev-dependencies]
 
