@@ -48,6 +48,8 @@ jobs:
           git config --local user.email "${SCM_EMAIL}"
 
       - name: Commit changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_SCM_TOKEN }}
         run: |
           git add .
           git commit -m "feat: Add imported packs ${{ inputs.pack-ids }}"
