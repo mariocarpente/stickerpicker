@@ -10,8 +10,6 @@ on:
 
 env:
   DEST_BRANCH: 'pages'
-  SCM_USER: ${{ secrets.SCM_USER }}
-  SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
 
 jobs:
   deploy:
@@ -23,13 +21,16 @@ jobs:
           fetch-depth: 0
 
       - name: Config git
+        env:
+          SCM_USER: ${{ secrets.SCM_USER }}
+          SCM_EMAIL: ${{ secrets.SCM_EMAIL }}
         run: |
           git config --local user.name "${SCM_USER}"
           git config --local user.email "${SCM_EMAIL}"
 
       - name: Check if pages branch exist and create
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_SCM_TOKEN }}
         run: |
           # Check if ${DEST_BRANCH} branch exist
           if [[ -z $(git ls-remote --heads origin "${DEST_BRANCH}") ]]; then
